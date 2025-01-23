@@ -1,0 +1,55 @@
+name: Free Windows RDP
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Disable Windows Defender Real-time Protection
+      run: |
+        Set-MpPreference -DisableRealtimeMonitoring $true
+
+    - name: Configure RDP Access
+      run: |
+        # Create user with specific credentials
+        New-LocalUser -Name "ahir" -Password (ConvertTo-SecureString -AsPlainText "ayar" -Force) -FullName "RDP User" -Description "Remote Desktop User"
+        
+        # Add user to Administrators group
+        Add-LocalGroupMember -Group "Administrators" -Member "ahir"
+        
+        # Enable Remote Desktop
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+        
+        # Configure Firewall Rules
+        Enable-NetFirewallRule -Name "RemoteDesktop-UserMode-In-TCP"
+        netsh advfirewall firewall add rule name="RDP" dir=in action=allow protocol=TCP localport=3389
+
+    - name: Download and Install Ngrok
+      run: |
+        # Download Ngrok
+        Invoke-WebRequest -Uri 'https://bin.equinox.io/a/nmkK3DkqZEB/ngrok-v3-stable-windows-amd64.zip' -OutFile ngrok.zip
+        
+        # Extract Ngrok
+        Expand-Archive ngrok.zip -DestinationPath . -Force
+        
+        # Authenticate Ngrok
+        .\ngrok\ngrok.exe authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+    - name: Create Ngrok Tunnel
+      run: |
+        # Start Ngrok tunnel to RDP port
+        Start-Process .\ngrok\ngrok.exe -ArgumentList "tcp 3389" -PassThru
+
+    - name: Display Connection Information
+      run: |
+        # Retrieve and display tunnel details
+        $tunnelInfo = Invoke-RestMethod -Uri http://localhost:4040/api/tunnels
+        Write-Host "RDP Connection Details:"
+        Write-Host "Username: ahir"
+        Write-Host "Password: ayar"
+        Write-Host "Tunnel Endpoint: $($tunnelInfo.tunnels[0].public_url)"
+
+    - name: Maintain Session
+      run: |
+        # Keep workflow active
+        Start-Sleep -Seconds 21600  # 6 hours
