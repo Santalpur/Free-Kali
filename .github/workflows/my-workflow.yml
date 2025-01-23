@@ -1,1 +1,24 @@
+name: Free Kali Linux RDP
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Kali Linux
+        run: |
+          sudo apt update && sudo apt install -y xfce4 xfce4-goodies tightvncserver kali-defaults kali-root-login kali-linux-top10
+          mkdir -p ~/.vnc
+          echo "yourpassword" | vncpasswd -f > ~/.vnc/passwd
+          chmod 600 ~/.vnc/passwd
+          vncserver :1 -geometry 1280x720
+          
+      - name: Setup NGROK for RDP
+        run: |
+          wget https://raw.githubusercontent.com/amityadav100/Free-RDP/main/ngrok.sh && chmod +x ngrok.sh
+          ./ngrok.sh
+          
+      - name: Keep Alive
+        run: sleep 6h
 
