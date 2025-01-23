@@ -12,10 +12,10 @@ jobs:
     - name: Configure RDP Access
       run: |
         # Create user with specific credentials
-        New-LocalUser -Name "ahir" -Password (ConvertTo-SecureString -AsPlainText "ayar" -Force) -FullName "RDP User" -Description "Remote Desktop User"
+        New-LocalUser -Name "ahir12345" -Password (ConvertTo-SecureString -AsPlainText "ayar123456" -Force) -FullName "RDP User" -Description "Remote Desktop User"
         
         # Add user to Administrators group
-        Add-LocalGroupMember -Group "Administrators" -Member "ahir"
+        Add-LocalGroupMember -Group "Administrators" -Member "ahir12345"
         
         # Enable Remote Desktop
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
