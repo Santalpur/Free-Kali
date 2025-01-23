@@ -17,7 +17,7 @@ jobs:
 
       - name: Add Kali Linux GPG Key
         run: |
-          curl -fsSL https://archive.kali.org/archive-key.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/kali.gpg
+          sudo curl -fsSL https://archive.kali.org/archive-key.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/kali.gpg
 
       - name: Install Kali Linux Tools
         run: |
@@ -39,7 +39,3 @@ jobs:
       - name: Keep RDP Alive
         run: |
           tail -f /dev/null  # This will keep the workflow running
-
-
-
-
