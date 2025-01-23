@@ -11,12 +11,15 @@ jobs:
           sudo apt update && sudo apt upgrade -y
           sudo apt install -y gnupg2 wget lsb-release curl
 
-      - name: Add Kali Linux repositories
+      - name: Add Kali Linux Repositories
         run: |
           echo "deb http://http.kali.org/kali kali-rolling main non-free contrib" | sudo tee -a /etc/apt/sources.list
+
+      - name: Add Kali GPG Key
+        run: |
           curl -fsSL https://archive.kali.org/archive-key.asc | sudo tee /etc/apt/trusted.gpg.d/kali.gpg
 
-      - name: Install Kali Linux Tools (VNC Server, XFCE, etc.)
+      - name: Install Kali Linux Tools
         run: |
           sudo apt update
           sudo apt install -y xfce4 xfce4-goodies tightvncserver kali-linux-all
@@ -36,5 +39,6 @@ jobs:
       - name: Keep RDP Alive
         run: |
           tail -f /dev/null  # This will keep the workflow running
+
 
 
