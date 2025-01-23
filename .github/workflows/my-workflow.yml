@@ -31,22 +31,37 @@ jobs:
           chmod 600 ~/.vnc/passwd
           vncserver :1 -geometry 1280x720
 
-      - name: Download and Install NGROK
+      - name: Download NGROK and Install
         run: |
-          # Download the latest NGROK from the correct source
-          curl -s https://ngrok.com/download | grep -oP 'https://bin.equinox.io/c/4VmDzA7iaJY/ngrok-stable-linux-amd64.zip' | xargs wget -O ngrok.zip
-          
-          # Unzip the downloaded NGROK file
+          # Download the latest stable NGROK binary for Linux
+          echo "Downloading NGROK..."
+          curl -Lo ngrok.zip https://bin.equinox.io/c/4VmDzA7iaJY/ngrok-stable-linux-amd64.zip
+
+          # Check if the download was successful
+          if [ ! -f ngrok.zip ]; then
+            echo "NGROK download failed, please check the URL or try again later."
+            exit 1
+          fi
+
+          # Unzip the downloaded NGROK binary
           unzip ngrok.zip
+
+          # Check if unzip was successful
+          if [ ! -f ngrok ]; then
+            echo "NGROK extraction failed."
+            exit 1
+          fi
+
+          # Make NGROK executable
           chmod +x ngrok
 
-          # Authenticate NGROK with your token
+          # Authenticate NGROK with your token from GitHub secrets
+          echo "Authenticating NGROK..."
           ./ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
 
-          # Expose the VNC service (5901) via NGROK tunnel
+          # Start NGROK to expose VNC service (port 5901)
           nohup ./ngrok tcp 5901 &
 
       - name: Keep RDP Alive
         run: |
-          tail -f /dev/null  # Keep the workflow running
-
+          tail -f /dev/null  # Keep the workflow running to maintain the RDP connection
