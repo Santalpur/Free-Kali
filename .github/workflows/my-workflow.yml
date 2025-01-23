@@ -9,7 +9,7 @@ jobs:
       - name: Update and Install Required Packages
         run: |
           sudo apt update && sudo apt upgrade -y
-          sudo apt install -y gnupg2 wget lsb-release curl
+          sudo apt install -y gnupg2 wget lsb-release curl unzip
 
       - name: Add Kali Linux Repositories
         run: |
@@ -22,7 +22,7 @@ jobs:
       - name: Install Kali Linux Tools
         run: |
           sudo apt update
-          sudo apt install -y xfce4 xfce4-goodies tightvncserver nmap metasploit-framework aircrack-ng  # Install tools individually
+          sudo apt install -y xfce4 xfce4-goodies tightvncserver nmap metasploit-framework aircrack-ng
 
       - name: Setup VNC Server
         run: |
@@ -33,11 +33,20 @@ jobs:
 
       - name: Setup NGROK for RDP
         run: |
-          wget https://raw.githubusercontent.com/amityadav100/Free-RDP/main/ngrok.sh && chmod +x ngrok.sh
-          nohup ./ngrok.sh > ngrok.log 2>&1 &  # Run NGROK in the background
+          # Download NGROK
+          wget https://bin.equinox.io/c/4VmDzA7iaJY/ngrok-stable-linux-amd64.zip
+          unzip ngrok-stable-linux-amd64.zip
+          chmod +x ngrok
+
+          # Use the NGROK authentication token from GitHub Secrets
+          ./ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+          # Expose the VNC service via NGROK tunnel
+          nohup ./ngrok tcp 5901 &
 
       - name: Keep RDP Alive
         run: |
-          tail -f /dev/null  # This will keep the workflow running
+          tail -f /dev/null  # Keep the workflow running
+
 
 
