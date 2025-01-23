@@ -6,19 +6,35 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Install Kali Linux
+      - name: Update and Install Required Packages
         run: |
-          sudo apt update && sudo apt install -y xfce4 xfce4-goodies tightvncserver kali-defaults kali-root-login kali-linux-top10
+          sudo apt update && sudo apt upgrade -y
+          sudo apt install -y gnupg2 wget lsb-release curl
+
+      - name: Add Kali Linux repositories
+        run: |
+          echo "deb http://http.kali.org/kali kali-rolling main non-free contrib" | sudo tee -a /etc/apt/sources.list
+          curl -fsSL https://archive.kali.org/archive-key.asc | sudo tee /etc/apt/trusted.gpg.d/kali.gpg
+
+      - name: Install Kali Linux Tools (VNC Server, XFCE, etc.)
+        run: |
+          sudo apt update
+          sudo apt install -y xfce4 xfce4-goodies tightvncserver kali-linux-all
+
+      - name: Setup VNC Server
+        run: |
           mkdir -p ~/.vnc
           echo "yourpassword" | vncpasswd -f > ~/.vnc/passwd
           chmod 600 ~/.vnc/passwd
           vncserver :1 -geometry 1280x720
-          
+
       - name: Setup NGROK for RDP
         run: |
           wget https://raw.githubusercontent.com/amityadav100/Free-RDP/main/ngrok.sh && chmod +x ngrok.sh
-          ./ngrok.sh
-          
-      - name: Keep Alive
-        run: sleep 6h
+          nohup ./ngrok.sh > ngrok.log 2>&1 &  # Run NGROK in the background
+
+      - name: Keep RDP Alive
+        run: |
+          tail -f /dev/null  # This will keep the workflow running
+
 
