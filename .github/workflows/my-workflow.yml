@@ -31,24 +31,15 @@ jobs:
           chmod 600 ~/.vnc/passwd
           vncserver :1 -geometry 1280x720
 
-      - name: Download NGROK and Install
+      - name: Download and Install NGROK
         run: |
-          # Download the latest stable NGROK binary for Linux
+          # Download the NGROK binary directly
           echo "Downloading NGROK..."
-          curl -Lo ngrok.zip https://bin.equinox.io/c/4VmDzA7iaJY/ngrok-stable-linux-amd64.zip
+          curl -Lo ngrok https://bin.equinox.io/c/4VmDzA7iaJY/ngrok-stable-linux-amd64
 
           # Check if the download was successful
-          if [ ! -f ngrok.zip ]; then
-            echo "NGROK download failed, please check the URL or try again later."
-            exit 1
-          fi
-
-          # Unzip the downloaded NGROK binary
-          unzip ngrok.zip
-
-          # Check if unzip was successful
           if [ ! -f ngrok ]; then
-            echo "NGROK extraction failed."
+            echo "NGROK download failed, please check the URL or try again later."
             exit 1
           fi
 
