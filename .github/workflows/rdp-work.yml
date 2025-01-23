@@ -12,7 +12,7 @@ jobs:
     - name: Configure RDP Access
       run: |
         # Create user with specific credentials
-        New-LocalUser -Name "ahir12345" -Password (ConvertTo-SecureString -AsPlainText "ayar123456" -Force) -FullName "RDP User" -Description "Remote Desktop User"
+        New-LocalUser -Name "ahir12345" -Password (ConvertTo-SecureString -AsPlainText "Ayar@123456" -Force) -FullName "RDP User" -Description "Remote Desktop User"
         
         # Add user to Administrators group
         Add-LocalGroupMember -Group "Administrators" -Member "ahir12345"
