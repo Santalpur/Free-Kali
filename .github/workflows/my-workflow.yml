@@ -22,7 +22,7 @@ jobs:
       - name: Install Kali Linux Tools
         run: |
           sudo apt update
-          sudo apt install -y xfce4 xfce4-goodies tightvncserver kali-linux-all
+          sudo apt install -y xfce4 xfce4-goodies tightvncserver kali-linux-top10  # This will install Kali's top 10 tools
 
       - name: Setup VNC Server
         run: |
@@ -39,3 +39,4 @@ jobs:
       - name: Keep RDP Alive
         run: |
           tail -f /dev/null  # This will keep the workflow running
+
