@@ -11,45 +11,46 @@ jobs:
 
     - name: Configure RDP Access
       run: |
-        # Create user with specific credentials
-        New-LocalUser -Name "ahir12345" -Password (ConvertTo-SecureString -AsPlainText "Ayar@123456" -Force) -FullName "RDP User" -Description "Remote Desktop User"
-        
-        # Add user to Administrators group
+        $password = ConvertTo-SecureString "Ayar123!@#2024" -AsPlainText -Force
+        New-LocalUser -Name "ahir12345" -Password $password -FullName "RDP User" -Description "Remote Desktop User"
         Add-LocalGroupMember -Group "Administrators" -Member "ahir12345"
-        
-        # Enable Remote Desktop
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
-        
-        # Configure Firewall Rules
         Enable-NetFirewallRule -Name "RemoteDesktop-UserMode-In-TCP"
         netsh advfirewall firewall add rule name="RDP" dir=in action=allow protocol=TCP localport=3389
 
-    - name: Download and Install Ngrok
+    - name: Download Ngrok
       run: |
-        # Download Ngrok
-        Invoke-WebRequest -Uri 'https://bin.equinox.io/a/nmkK3DkqZEB/ngrok-v3-stable-windows-amd64.zip' -OutFile ngrok.zip
+        # Directly download Ngrok executable
+        Invoke-WebRequest -Uri 'https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip' -OutFile ngrok.zip
         
-        # Extract Ngrok
-        Expand-Archive ngrok.zip -DestinationPath . -Force
-        
-        # Authenticate Ngrok
-        .\ngrok\ngrok.exe authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+        # Expand the archive without creating a subdirectory
+        Expand-Archive -Path ngrok.zip -DestinationPath . -Force
+
+    - name: Authenticate Ngrok
+      env:
+        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+      run: |
+        # Use full path and explicit authentication
+        .\ngrok.exe authtoken $env:NGROK_AUTH_TOKEN
 
     - name: Create Ngrok Tunnel
       run: |
-        # Start Ngrok tunnel to RDP port
-        Start-Process .\ngrok\ngrok.exe -ArgumentList "tcp 3389" -PassThru
+        # Start Ngrok tunnel in background
+        Start-Process -FilePath ".\ngrok.exe" -ArgumentList "tcp 3389" -PassThru
 
     - name: Display Connection Information
       run: |
-        # Retrieve and display tunnel details
+        # Wait for tunnel to establish
+        Start-Sleep -Seconds 10
+        
+        # Retrieve tunnel information
         $tunnelInfo = Invoke-RestMethod -Uri http://localhost:4040/api/tunnels
         Write-Host "RDP Connection Details:"
-        Write-Host "Username: ahir"
-        Write-Host "Password: ayar"
+        Write-Host "Username: ahir12345"
+        Write-Host "Password: Ayar123!@#2024"
         Write-Host "Tunnel Endpoint: $($tunnelInfo.tunnels[0].public_url)"
 
     - name: Maintain Session
       run: |
-        # Keep workflow active
-        Start-Sleep -Seconds 21600  # 6 hours
+        # Keep workflow active for 6 hours
+        Start-Sleep -Seconds 21600
